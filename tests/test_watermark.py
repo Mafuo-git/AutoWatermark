@@ -1,12 +1,10 @@
-import subprocess
 import tempfile
 import unittest
 from pathlib import Path
 
-import imageio_ffmpeg
 from PIL import Image
 
-from processing import process_file
+from processing import collect_folder, create_preview, process_file
 from watermark import WatermarkSettings, render_overlay
 
 
@@ -34,6 +32,15 @@ class WatermarkTests(unittest.TestCase):
         self.assertEqual(overlay.size, (160, 90))
         self.assertIsNotNone(overlay.getchannel("A").getbbox())
 
+    def test_create_preview_loads_and_scales_photo(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            source = Path(temporary_directory) / "photo.png"
+            Image.new("RGB", (160, 120), "#3a7d44").save(source)
+
+            preview = create_preview(source, (80, 60))
+
+            self.assertEqual(preview.size, (80, 60))
+
     def test_process_file_creates_watermarked_image(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             source = Path(temporary_directory) / "photo.png"
@@ -46,49 +53,23 @@ class WatermarkTests(unittest.TestCase):
                 self.assertEqual(result.size, (240, 120))
                 self.assertNotEqual(result.getpixel((120, 60)), (58, 125, 68, 255))
 
-    def test_process_file_watermarks_video_and_keeps_audio(self) -> None:
-        ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
+    def test_process_file_rejects_video(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             source = Path(temporary_directory) / "clip.mp4"
             destination = Path(temporary_directory) / "output" / "clip.mp4"
-            subprocess.run(
-                [
-                    ffmpeg,
-                    "-hide_banner",
-                    "-loglevel",
-                    "error",
-                    "-y",
-                    "-f",
-                    "lavfi",
-                    "-i",
-                    "testsrc=size=320x180:rate=12:duration=1",
-                    "-f",
-                    "lavfi",
-                    "-i",
-                    "sine=frequency=1000:duration=1",
-                    "-shortest",
-                    "-c:v",
-                    "libx264",
-                    "-pix_fmt",
-                    "yuv420p",
-                    "-c:a",
-                    "aac",
-                    str(source),
-                ],
-                check=True,
-                capture_output=True,
-            )
+            with self.assertRaisesRegex(ValueError, "Unsupported photo format"):
+                process_file(source, destination, self.settings)
+            self.assertFalse(destination.exists())
 
-            process_file(source, destination, self.settings)
+    def test_collect_folder_ignores_videos(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            folder = Path(temporary_directory)
+            photo = folder / "photo.jpg"
+            video = folder / "clip.mp4"
+            photo.touch()
+            video.touch()
 
-            probe = subprocess.run(
-                [ffmpeg, "-hide_banner", "-i", str(destination), "-f", "null", "-"],
-                check=False,
-                capture_output=True,
-                text=True,
-            )
-            self.assertEqual(probe.returncode, 0, probe.stderr)
-            self.assertIn("Audio:", probe.stderr)
+            self.assertEqual(collect_folder(folder), [photo])
 
 
 if __name__ == "__main__":

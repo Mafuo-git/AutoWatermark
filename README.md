@@ -2,7 +2,7 @@
 
 # AutoWatermark
 
-### A simple, offline tool for watermarking photos and videos in bulk.
+### A simple, offline tool for watermarking photos in bulk.
 
 Choose your media, style a text-and-logo watermark, drag it into place, and export.
 
@@ -18,16 +18,16 @@ Choose your media, style a text-and-logo watermark, drag it into place, and expo
 
 `📁 Select media` **→** `🎨 Style your watermark` **→** `↔ Drag to position` **→** `✨ Export`
 
-| 🖼️ Customize | 🎬 Process | 🛡️ Stay in control |
+| 🖼️ Customize | 🗂️ Process | 🛡️ Stay in control |
 |:---|:---|:---|
-| Text, logo, font, colors, size and opacity | Photos and videos, individually or by folder | Preview before processing; preserve originals by default |
+| Text, logo, font, colors, size and opacity | Photos, individually or by folder | Preview before processing; preserve originals by default |
 | Position your watermark directly on the preview | Folder selection includes subfolders | Optional overwrite requires confirmation |
 
 ## Get the Windows app
 
 Download **AutoWatermark-Windows-x64** from the latest successful run of [Build Windows executable](../../actions/workflows/build-windows.yml), then extract and double-click `AutoWatermark.exe`.
 
-The app is distributed as a single, self-contained Windows executable. The target PC does not need Python, FFmpeg, or separately installed libraries. The first launch may take a little longer while Windows scans the unsigned executable.
+The app is distributed as a single, self-contained Windows executable. The target PC does not need Python or separately installed libraries. The first launch may take a little longer while Windows scans the unsigned executable.
 
 ## Use it
 
@@ -39,13 +39,13 @@ The app is distributed as a single, self-contained Windows executable. The targe
 
 > **Protect your originals:** Output to a separate folder by default. Overwriting is optional, requires confirmation, and cannot be undone.
 
-### Supported formats
+### Supported photo formats
 
-| Photos and logos | Videos |
+| Photos | Logos |
 |:---|:---|
-| JPEG · PNG · WebP · BMP · TIFF | MP4 · MOV · M4V · MKV · AVI |
+| JPEG · PNG · WebP · BMP · TIFF | PNG · JPEG · WebP · BMP · TIFF |
 
-Videos are re-encoded as H.264 with AAC audio. Processing time and output characteristics depend on the source video. Unsupported or unreadable files are reported; failed jobs leave their originals intact.
+Video files are not supported or processed. When selecting a folder, the app only includes supported photos and ignores videos and other file types.
 
 ## Build from source
 
@@ -67,4 +67,4 @@ python app.py
 
 ## Privacy and licenses
 
-Media is processed locally and is not uploaded. The MIT-licensed project uses [Pillow](https://python-pillow.org/), [imageio-ffmpeg](https://github.com/imageio/imageio-ffmpeg), and [PyInstaller](https://pyinstaller.org/). Bundled FFmpeg and other third-party components are subject to their own licenses; see [LICENSE](./LICENSE).
+Photos are processed locally and are not uploaded. The MIT-licensed project uses [Pillow](https://python-pillow.org/) and [PyInstaller](https://pyinstaller.org/); see [LICENSE](./LICENSE).
